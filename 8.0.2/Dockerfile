@@ -23,9 +23,14 @@ RUN chmod +x /docker-entrypoint.sh && \
     chown postgres /docker-entrypoint.sh
 
 USER postgres
+
 RUN ./usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
 
 COPY ./postgresql.conf ./pg_hba.conf /usr/local/pgsql/data/
+
+RUN ./usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data -w start && \
+    ./usr/local/pgsql/bin/createdb postgres && \
+    ./usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data stop
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ./usr/local/pgsql/bin/postmaster -D /usr/local/pgsql/data
