@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-./pg_ctl -D ./../data start
+./usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data start
 
 
 sleep 5
 
 
-./createdb postgres
-./createdb $POSTGRES_DATABASE
+./usr/local/pgsql/bin/createdb postgres
+./usr/local/pgsql/bin/createdb $POSTGRES_DATABASE
 
 
 if [ "$POSTGRES_USER" = 'postgres' ]; then
@@ -17,10 +17,10 @@ else
 	op='CREATE'
 fi
 
-./psql --username postgres <<-EOSQL
+./usr/local/pgsql/bin/psql --username postgres <<-EOSQL
 	$op USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD' ;
 EOSQL
 
-./pg_ctl -D ./../data stop
+./usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data stop
 
 exec "$@"
