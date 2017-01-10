@@ -1,21 +1,22 @@
 # Docker Postgres 8
 
-[![Docker Automated Build](https://img.shields.io/docker/automated/foundryai/postgres8.svg)]()
+[![Docker Automated Build](https://img.shields.io/docker/automated/foundryai/postgres8.svg)](https://hub.docker.com/r/foundryai/postgres8/)
 
 This is a docker image used to run a Postgres version 8 docker image for local testing. Ideally to be used with docker-compose.
 
 **This image is not production-ready. It is for local testing purposes only. Use at your own risk.**
 
-The initial use case for this was to test connecting to an Amazon AWS Redshift cluster. Redshift runs Postgres version 8.0.2, therefore that is the only one I have supplied an image for.
+The initial use case for this was to test connecting to an Amazon AWS Redshift cluster.
+Redshift runs Postgres version 8.0.2 with some modifications, so images tagged `8.0.2` and `redshift` are provided (`latest` currently pulls `8.0.2`).
 
 
 There are 3 Environment Variables to set:
-POSTGRES_USER - the name of the user to use to log into the database
-POSTGRES_PASSWORD - the password to use to authenticate with the database
-POSTGRES_DATABASE - the name of the database to create and use
+`POSTGRES_USER` - the name of the user to use to log into the database
+`POSTGRES_PASSWORD` - the password to use to authenticate with the database
+`POSTGRES_DATABASE` - the name of the database to create and use
 
 
-Copy this snippet into your docker-compose.yml file:
+Copy this snippet into your `docker-compose.yml` file:
 
     db:
       image: foundryai/docker-postgres8
