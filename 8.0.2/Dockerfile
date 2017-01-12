@@ -1,36 +1,54 @@
-FROM ubuntu:16.04
+FROM debian:jessie
 
-RUN apt-get update && \
-    apt-get -y upgrade && \
-    apt-get -y install build-essential libreadline6 libreadline6-dev zlib1g-dev vim wget
+RUN groupadd -r postgres --gid=999 \
+    && useradd -r -g postgres --uid=999 postgres
 
-RUN mkdir /downloads && \
-    cd /downloads && \
-    wget https://ftp.postgresql.org/pub/source/v8.0.2/postgresql-8.0.2.tar.gz && \
-    tar -xzf postgresql-8.0.2.tar.gz && \
-    rm postgresql-8.0.2.tar.gz && \
-    cd postgresql-8.0.2 && \
-    ./configure && \
-    make && \
-    make install && \
-    adduser postgres && \
-    mkdir /usr/local/pgsql/data && \
-    chown postgres /usr/local/pgsql/data && \
-    rm -rf /downloads
+ENV GOSU_VERSION 1.9
+RUN set -x \
+    && apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
+    && dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
+    && wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" \
+    && wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc" \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+    && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+    && chmod +x /usr/local/bin/gosu \
+    && gosu nobody true \
+    && apt-get purge -y --auto-remove ca-certificates wget
 
-COPY ./docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh && \
-    chown postgres /docker-entrypoint.sh
+RUN apt-get update \
+    && apt-get -y upgrade \
+    && apt-get -y install \
+      build-essential \
+      libreadline6 \
+      libreadline6-dev \
+      wget \
+      zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-USER postgres
+RUN mkdir /downloads \
+    && cd /downloads \
+    && wget https://ftp.postgresql.org/pub/source/v8.0.2/postgresql-8.0.2.tar.gz \
+    && tar -xzf postgresql-8.0.2.tar.gz \
+    && rm postgresql-8.0.2.tar.gz \
+    && cd postgresql-8.0.2 \
+    && ./configure \
+    && make \
+    && make install \
+    && cd / \
+    && rm -rf /downloads
 
-RUN ./usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data
+ENV PATH /usr/local/pgsql/bin:$PATH
 
-COPY ./postgresql.conf ./pg_hba.conf /usr/local/pgsql/data/
+ENV PGDATA /var/lib/pgsql/data
+VOLUME /var/lib/pgsql/data
 
-RUN ./usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data -w start && \
-    ./usr/local/pgsql/bin/createdb postgres && \
-    ./usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data stop
+COPY postgresql.conf pg_hba.conf /config/
+COPY docker-entrypoint.sh /
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ./usr/local/pgsql/bin/postmaster -D /usr/local/pgsql/data
+
+EXPOSE 5432
+
+CMD ["postgres"]

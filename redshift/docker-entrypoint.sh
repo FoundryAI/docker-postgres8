@@ -20,14 +20,20 @@ if [ "$1" = 'postgres' ]; then
     fi
 
     if [ "$POSTGRES_USER" = 'postgres' ]; then
-      op='ALTER'
+    	op='ALTER'
     else
-      op='CREATE'
+    	op='CREATE'
     fi
 
     gosu postgres psql \
       --username postgres \
       -c "$op USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';"
+
+    # REDSHIFT:START
+    gosu postgres psql \
+      --username postgres \
+      -c "CREATE USER rdsdb;"
+    # REDSHIFT:END
 
     gosu postgres pg_ctl -D "$PGDATA" -w stop
   fi

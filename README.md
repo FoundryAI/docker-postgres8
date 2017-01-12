@@ -10,11 +10,12 @@ The initial use case for this was to test connecting to an Amazon AWS Redshift c
 Redshift runs Postgres version 8.0.2 with some modifications, so images tagged `8.0.2` and `redshift` are provided (`latest` currently pulls `8.0.2`).
 
 
-There are 3 Environment Variables to set:
-`POSTGRES_USER` - the name of the user to use to log into the database
-`POSTGRES_PASSWORD` - the password to use to authenticate with the database
-`POSTGRES_DATABASE` - the name of the database to create and use
-
+| Environment Variable | Default |
+|----------------------|---------|
+| `POSTGRES_USER` | `postgres` |
+| `POSTGRES_PASSWORD` |  |
+| `POSTGRES_DATABASE` | `postgres` |
+| `PGDATA` | `/usr/local/pgsql/data` (volume) |
 
 Copy this snippet into your `docker-compose.yml` file:
 
@@ -26,6 +27,8 @@ Copy this snippet into your `docker-compose.yml` file:
         POSTGRES_DATABASE: docker
       ports:
         - 5432:5432
+      volumes:
+        - ./data:/usr/local/psql/data
 
 Alternatively, run this command to run the container:
 
