@@ -27,6 +27,8 @@ RUN apt-get update \
       zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir /docker-entrypoint-initdb.d
+
 RUN mkdir /downloads \
     && cd /downloads \
     && wget https://ftp.postgresql.org/pub/source/v8.0.2/postgresql-8.0.2.tar.gz \
