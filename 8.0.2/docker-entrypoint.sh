@@ -19,8 +19,6 @@ if [ "$1" = 'postgres' ]; then
 
     gosu postgres pg_ctl -D "$PGDATA" -w start
 
-    gosu postgres createdb || true
-
     if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
       gosu postgres createdb $POSTGRES_DATABASE
     fi
