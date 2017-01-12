@@ -5,4 +5,4 @@ RUN /usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data -w start && \
     /usr/local/pgsql/bin/pg_ctl -D ./usr/local/pgsql/data stop
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ./usr/local/pgsql/bin/postmaster -D /usr/local/pgsql/data
+CMD ["./usr/local/pgsql/bin/postmaster", "-D", "/usr/local/pgsql/data"]
