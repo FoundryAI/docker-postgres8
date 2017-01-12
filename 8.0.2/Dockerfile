@@ -48,8 +48,11 @@ VOLUME /var/lib/pgsql/data
 COPY postgresql.conf pg_hba.conf /config/
 COPY docker-entrypoint.sh /
 
+ENV POSTGRES_USER postgres
+ENV POSTGRES_DATABASE postgres
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 5432
 
-CMD ["postgres", "pg_ctl", "-w", "start"]
+CMD ["postmaster"]

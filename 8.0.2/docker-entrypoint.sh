@@ -2,11 +2,11 @@
 set -e
 
 if [ "${1:0:1}" = '-' ]; then
-	set -- postgres "$@"
+	set -- postmaster "$@"
 fi
 
 # If we're starting the DB
-if [ "$1" = 'postgres' ]; then
+if [ "$1" = 'postmaster' ]; then
   mkdir -p "$PGDATA"
 	chmod 700 "$PGDATA"
 	chown -R postgres "$PGDATA"
@@ -18,6 +18,10 @@ if [ "$1" = 'postgres' ]; then
     cp -R /config/* "$PGDATA"
 
     gosu postgres pg_ctl -D "$PGDATA" -w start
+
+    if ! psql -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_USER"; then
+      gosu postgres createdb
+    fi
 
     if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
       gosu postgres createdb $POSTGRES_DATABASE
@@ -48,13 +52,7 @@ if [ "$1" = 'postgres' ]; then
     gosu postgres pg_ctl -D "$PGDATA" -w stop
   fi
 
-	if [ "$2" = 'pg_ctl' ]; then
-		shift # postgres
-		shift # pg_ctl
-		exec gosu postgres pg_ctl -D "$PGDATA" "$@"
-	else
-		exec gosu postgres "$@"
-	fi
+  exec gosu postgres "$@"
 fi
 
 exec "$@"
