@@ -33,7 +33,6 @@ RUN mkdir /downloads \
     && cd /downloads \
     && wget https://ftp.postgresql.org/pub/source/v8.0.2/postgresql-8.0.2.tar.gz \
     && tar -xzf postgresql-8.0.2.tar.gz \
-    && rm postgresql-8.0.2.tar.gz \
     && cd postgresql-8.0.2 \
     && ./configure \
     && make \
@@ -53,4 +52,4 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 5432
 
-CMD ["postgres"]
+CMD ["postgres", "pg_ctl", "-w", "start"]

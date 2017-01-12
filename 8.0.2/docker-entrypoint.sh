@@ -48,7 +48,13 @@ if [ "$1" = 'postgres' ]; then
     gosu postgres pg_ctl -D "$PGDATA" -w stop
   fi
 
-  exec gosu postgres "$@"
+	if [ "$2" = 'pg_ctl' ]; then
+		shift # postgres
+		shift # pg_ctl
+		exec gosu postgres pg_ctl -D "$PGDATA" "$@"
+	else
+		exec gosu postgres "$@"
+	fi
 fi
 
 exec "$@"
