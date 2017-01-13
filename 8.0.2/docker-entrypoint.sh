@@ -19,13 +19,19 @@ if [ "$1" = 'postmaster' ]; then
 
     gosu postgres pg_ctl -D "$PGDATA" -w start
 
-    if ! psql -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_USER"; then
+		if ! gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw postgres; then
       gosu postgres createdb
     fi
 
-    if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
-      gosu postgres createdb $POSTGRES_DATABASE
+    if ! gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_USER"; then
+      gosu postgres createdb "$POSTGRES_USER"
     fi
+
+    if ! gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_DATABASE"; then
+      gosu postgres createdb "$POSTGRES_DATABASE"
+    fi
+
+		gosu postgres psql -lqt
 
     if [ "$POSTGRES_USER" = 'postgres' ]; then
       op='ALTER'
