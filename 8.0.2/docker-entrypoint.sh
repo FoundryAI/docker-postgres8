@@ -2,14 +2,14 @@
 set -e
 
 if [ "${1:0:1}" = '-' ]; then
-	set -- postmaster "$@"
+  set -- postmaster "$@"
 fi
 
 # If we're starting the DB
 if [ "$1" = 'postmaster' ]; then
   mkdir -p "$PGDATA"
-	chmod 700 "$PGDATA"
-	chown -R postgres "$PGDATA"
+  chmod 700 "$PGDATA"
+  chown -R postgres "$PGDATA"
 
   # Run initialization if PG_VERSION is not set
   if [ ! -s "$PGDATA/PG_VERSION" ]; then
@@ -19,13 +19,19 @@ if [ "$1" = 'postmaster' ]; then
 
     gosu postgres pg_ctl -D "$PGDATA" -w start
 
-    if ! psql -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_USER"; then
+    if ! gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw postgres; then
       gosu postgres createdb
     fi
 
-    if [ "$POSTGRES_DATABASE" != 'postgres' ]; then
-      gosu postgres createdb $POSTGRES_DATABASE
+    if ! gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_USER"; then
+      gosu postgres createdb "$POSTGRES_USER"
     fi
+
+    if ! gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$POSTGRES_DATABASE"; then
+      gosu postgres createdb "$POSTGRES_DATABASE"
+    fi
+
+    gosu postgres psql -lqt
 
     if [ "$POSTGRES_USER" = 'postgres' ]; then
       op='ALTER'
@@ -34,7 +40,6 @@ if [ "$1" = 'postmaster' ]; then
     fi
 
     gosu postgres psql \
-      --username postgres \
       -c "$op USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';"
 
     psql=( psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DATABASE" )
