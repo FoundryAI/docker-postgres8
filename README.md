@@ -20,7 +20,7 @@ Redshift runs Postgres version 8.0.2 with some modifications, so images tagged `
 Copy this snippet into your `docker-compose.yml` file:
 
     db:
-      image: foundryai/docker-postgres8
+      image: foundryai/postgres8
       environment:
         POSTGRES_USER: docker
         POSTGRES_PASSWORD: docker
